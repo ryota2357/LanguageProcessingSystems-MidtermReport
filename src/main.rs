@@ -204,7 +204,20 @@ mod parser {
                     break;
                 }
                 tokens.next();
-                lhs = Expr::Unary(op, Box::new(lhs));
+                if op == '(' {
+                    let arg = expr_bp(tokens, 0);
+                    match tokens.next() {
+                        Some(Token::Op(')')) => (),
+                        _ => panic!("Expected ')', got {:?}", tokens.peek()),
+                    }
+                    let name = match lhs {
+                        Expr::Ident(name) => name,
+                        _ => panic!("Expected ident, got {:?}", lhs),
+                    };
+                    lhs = Expr::Call(name, Box::new(arg));
+                } else {
+                    lhs = Expr::Unary(op, Box::new(lhs));
+                }
                 continue;
             }
 
@@ -240,7 +253,7 @@ mod parser {
 
         fn postfix_op(&self) -> Option<(char, u8)> {
             match self {
-                Token::Op(c @ '!') => Some((*c, 9)),
+                Token::Op(c @ ('!' | '(')) => Some((*c, 9)),
                 _ => None,
             }
         }
