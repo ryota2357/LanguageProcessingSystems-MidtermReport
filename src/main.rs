@@ -189,6 +189,13 @@ mod parser {
             None => match current {
                 Token::Num(x) => Expr::Num(*x),
                 Token::Ident(x) => Expr::Ident(x.clone()),
+                Token::Op('(') => {
+                    let res = expr_bp(tokens, 0);
+                    match tokens.next() {
+                        Some(Token::Op(')')) => res,
+                        _ => panic!("Expected ')', got {:?}", tokens.peek()),
+                    }
+                }
                 Token::Op(op) => panic!("Unexpected op: {:?}", op),
             },
         };
