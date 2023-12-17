@@ -154,12 +154,25 @@ mod parser {
     use std::{iter::Peekable, slice::Iter};
 
     pub fn parse(tokens: &[Token]) -> Stmt {
-        let mut tokens = tokens.iter().peekable();
-        let expr = expr_bp(&mut tokens, 0);
-        if tokens.next().is_some() {
-            panic!("Expected EOI, got {:?}", tokens.peek());
+        match (tokens.get(0), tokens.get(1)) {
+            (None, _) => panic!("Unexpected EOI"),
+            (Some(Token::Ident(name)), Some(Token::Op('='))) => {
+                let mut tokens = tokens[2..].iter().peekable();
+                let expr = expr_bp(&mut tokens, 0);
+                if tokens.next().is_some() {
+                    panic!("Expected EOI, got {:?}", tokens.peek());
+                }
+                Stmt::Assign(name.clone(), expr)
+            }
+            _ => {
+                let mut tokens = tokens.iter().peekable();
+                let expr = expr_bp(&mut tokens, 0);
+                if tokens.next().is_some() {
+                    panic!("Expected EOI, got {:?}", tokens.peek());
+                }
+                Stmt::Expr(expr)
+            }
         }
-        Stmt::Expr(expr)
     }
 
     fn expr_bp(tokens: &mut Peekable<Iter<'_, Token>>, min_bp: u8) -> Expr {
