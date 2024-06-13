@@ -1,9 +1,8 @@
-
 use super::{Expr, Stmt, Token};
 use std::{iter::Peekable, slice::Iter};
 
 pub fn parse(tokens: &[Token]) -> Stmt {
-    match (tokens.get(0), tokens.get(1)) {
+    match (tokens.first(), tokens.get(1)) {
         (None, _) => panic!("Unexpected EOI"),
         (Some(Token::Ident(name)), Some(Token::Op('='))) => {
             let mut tokens = tokens[2..].iter().peekable();
