@@ -1,7 +1,3 @@
-# learn-pratt-parser
+# 言語処理系論 中間レポート
 
-> Learning project of Pratt Parsing.
-
-I wrote a Japanese article: [Prattパーサを使って電卓を作ってみる](https://ryota2357.com/blog/2023/calc-with-pratt-parser/)
-
-Reference: [Simple but Powerful Pratt Parsing](https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html)
+> 四則演算と変数定義から成る関数電卓言語を実装可能なスタックマシンの命令セットを設計し，具体的な翻訳例を使って説明せよ．
