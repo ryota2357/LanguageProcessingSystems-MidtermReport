@@ -1,11 +1,14 @@
 use std::{
     collections::HashMap,
+    fmt,
     io::{stdin, stdout, Write},
 };
 
+mod compiler;
 mod interpreter;
 mod lexer;
 mod parser;
+mod vm;
 
 #[derive(Debug, Clone, PartialEq)]
 enum Token {
@@ -27,6 +30,43 @@ enum Expr {
 enum Stmt {
     Assign(String, Expr),
     Expr(Expr),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+enum OpCode {
+    LoadConst(f64),
+    LoadLocal(String),
+    SetLocal(String),
+    OpPos,
+    OpNeg,
+    OpFact,
+    OpAdd,
+    OpSub,
+    OpMul,
+    OpDiv,
+    OpPow,
+    Call(String),
+}
+
+impl fmt::Display for OpCode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        #[rustfmt::skip]
+        let res = match self {
+            OpCode::LoadConst(c) => write!(f, "ldc   {}", c),
+            OpCode::LoadLocal(l) => write!(f, "ldl   {}", l),
+            OpCode::SetLocal(l)  => write!(f, "stl   {}", l),
+            OpCode::OpPos        => write!(f, "pos"),
+            OpCode::OpNeg        => write!(f, "neg"),
+            OpCode::OpFact       => write!(f, "fact"),
+            OpCode::OpAdd        => write!(f, "add"),
+            OpCode::OpSub        => write!(f, "sub"),
+            OpCode::OpMul        => write!(f, "mul"),
+            OpCode::OpDiv        => write!(f, "div"),
+            OpCode::OpPow        => write!(f, "pow"),
+            OpCode::Call(c)      => write!(f, "call  {}", c),
+        };
+        res
+    }
 }
 
 fn main() {
@@ -72,5 +112,17 @@ fn interpreter_mode(env: &mut HashMap<String, f64>) {
 }
 
 fn vm_mode(_env: &mut HashMap<String, f64>) {
-    unimplemented!();
+    loop {
+        let line = question("> ");
+        let tokens = lexer::parse(&line);
+        let stmt = parser::parse(&tokens);
+        let opcodes = compiler::compile(&stmt);
+        for (i, opcode) in opcodes.iter().enumerate() {
+            println!("{:0>3}: {}", i, opcode);
+        }
+        let res = vm::execute(&opcodes, _env);
+        if let Some(res) = res {
+            println!("= {}", res);
+        }
+    }
 }
