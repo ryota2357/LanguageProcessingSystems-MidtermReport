@@ -33,7 +33,7 @@ enum Stmt {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-enum OpCode {
+enum Instr {
     LoadConst(f64),
     LoadLocal(String),
     SetLocal(String),
@@ -48,22 +48,22 @@ enum OpCode {
     Call(String),
 }
 
-impl fmt::Display for OpCode {
+impl fmt::Display for Instr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[rustfmt::skip]
         let res = match self {
-            OpCode::LoadConst(c) => write!(f, "ldc   {}", c),
-            OpCode::LoadLocal(l) => write!(f, "ldl   {}", l),
-            OpCode::SetLocal(l)  => write!(f, "stl   {}", l),
-            OpCode::OpPos        => write!(f, "pos"),
-            OpCode::OpNeg        => write!(f, "neg"),
-            OpCode::OpFact       => write!(f, "fact"),
-            OpCode::OpAdd        => write!(f, "add"),
-            OpCode::OpSub        => write!(f, "sub"),
-            OpCode::OpMul        => write!(f, "mul"),
-            OpCode::OpDiv        => write!(f, "div"),
-            OpCode::OpPow        => write!(f, "pow"),
-            OpCode::Call(c)      => write!(f, "call  {}", c),
+            Instr::LoadConst(c) => write!(f, "ldc   {}", c),
+            Instr::LoadLocal(l) => write!(f, "ldl   {}", l),
+            Instr::SetLocal(l)  => write!(f, "stl   {}", l),
+            Instr::OpPos        => write!(f, "pos"),
+            Instr::OpNeg        => write!(f, "neg"),
+            Instr::OpFact       => write!(f, "fact"),
+            Instr::OpAdd        => write!(f, "add"),
+            Instr::OpSub        => write!(f, "sub"),
+            Instr::OpMul        => write!(f, "mul"),
+            Instr::OpDiv        => write!(f, "div"),
+            Instr::OpPow        => write!(f, "pow"),
+            Instr::Call(c)      => write!(f, "call  {}", c),
         };
         res
     }
@@ -116,11 +116,11 @@ fn vm_mode(_env: &mut HashMap<String, f64>) {
         let line = question("> ");
         let tokens = lexer::parse(&line);
         let stmt = parser::parse(&tokens);
-        let opcodes = compiler::compile(&stmt);
-        for (i, opcode) in opcodes.iter().enumerate() {
-            println!("{:0>3}: {}", i, opcode);
+        let instrs = compiler::compile(&stmt);
+        for (i, instr) in instrs.iter().enumerate() {
+            println!("{:0>3}: {}", i, instr);
         }
-        let res = vm::execute(&opcodes, _env);
+        let res = vm::execute(&instrs, _env);
         if let Some(res) = res {
             println!("= {}", res);
         }

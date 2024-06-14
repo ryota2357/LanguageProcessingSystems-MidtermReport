@@ -1,49 +1,49 @@
 use crate::Expr;
 
-use super::{OpCode, Stmt};
+use super::{Instr, Stmt};
 
-pub(super) fn compile(stmt: &Stmt) -> Vec<OpCode> {
+pub(super) fn compile(stmt: &Stmt) -> Vec<Instr> {
     match stmt {
         Stmt::Assign(ident, expr) => {
-            let mut opcodes = compile_expr(expr);
-            opcodes.push(OpCode::SetLocal(ident.clone()));
-            opcodes
+            let mut instrs = compile_expr(expr);
+            instrs.push(Instr::SetLocal(ident.clone()));
+            instrs
         }
         Stmt::Expr(expr) => compile_expr(expr),
     }
 }
 
-fn compile_expr(expr: &Expr) -> Vec<OpCode> {
+fn compile_expr(expr: &Expr) -> Vec<Instr> {
     match expr {
-        Expr::Num(num) => vec![OpCode::LoadConst(*num)],
-        Expr::Ident(ident) => vec![OpCode::LoadLocal(ident.clone())],
+        Expr::Num(num) => vec![Instr::LoadConst(*num)],
+        Expr::Ident(ident) => vec![Instr::LoadLocal(ident.clone())],
         Expr::Unary(op, expr) => {
-            let mut opcodes = compile_expr(expr);
+            let mut instrs = compile_expr(expr);
             match op {
-                '+' => opcodes.push(OpCode::OpPos),
-                '-' => opcodes.push(OpCode::OpNeg),
-                '!' => opcodes.push(OpCode::OpFact),
+                '+' => instrs.push(Instr::OpPos),
+                '-' => instrs.push(Instr::OpNeg),
+                '!' => instrs.push(Instr::OpFact),
                 _ => unimplemented!("op: {}", op),
             }
-            opcodes
+            instrs
         }
         Expr::Binary(op, lhs, rhs) => {
-            let mut opcodes = compile_expr(lhs);
-            opcodes.extend(compile_expr(rhs));
+            let mut instrs = compile_expr(lhs);
+            instrs.extend(compile_expr(rhs));
             match op {
-                '+' => opcodes.push(OpCode::OpAdd),
-                '-' => opcodes.push(OpCode::OpSub),
-                '*' => opcodes.push(OpCode::OpMul),
-                '/' => opcodes.push(OpCode::OpDiv),
-                '^' => opcodes.push(OpCode::OpPow),
+                '+' => instrs.push(Instr::OpAdd),
+                '-' => instrs.push(Instr::OpSub),
+                '*' => instrs.push(Instr::OpMul),
+                '/' => instrs.push(Instr::OpDiv),
+                '^' => instrs.push(Instr::OpPow),
                 _ => unimplemented!("op: {}", op),
             }
-            opcodes
+            instrs
         }
         Expr::Call(ident, expr) => {
-            let mut opcodes = compile_expr(expr);
-            opcodes.push(OpCode::Call(ident.clone()));
-            opcodes
+            let mut instrs = compile_expr(expr);
+            instrs.push(Instr::Call(ident.clone()));
+            instrs
         }
     }
 }

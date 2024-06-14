@@ -1,30 +1,30 @@
-use crate::OpCode;
+use crate::Instr;
 use std::collections::HashMap;
 
-pub(super) fn execute(opcodes: &[OpCode], env: &mut HashMap<String, f64>) -> Option<f64> {
+pub(super) fn execute(instrs: &[Instr], env: &mut HashMap<String, f64>) -> Option<f64> {
     let mut stack = Vec::new();
-    for opcode in opcodes {
-        match opcode {
-            OpCode::LoadConst(num) => stack.push(*num),
-            OpCode::LoadLocal(ident) => {
+    for instr in instrs {
+        match instr {
+            Instr::LoadConst(num) => stack.push(*num),
+            Instr::LoadLocal(ident) => {
                 let Some(value) = env.get(ident) else {
                     panic!("Undefined variable: {}", ident);
                 };
                 stack.push(*value);
             }
-            OpCode::SetLocal(ident) => {
+            Instr::SetLocal(ident) => {
                 let value = stack.pop().unwrap();
                 env.insert(ident.clone(), value);
             }
-            OpCode::OpPos => {
+            Instr::OpPos => {
                 let value = stack.pop().unwrap();
                 stack.push(value);
             }
-            OpCode::OpNeg => {
+            Instr::OpNeg => {
                 let value = stack.pop().unwrap();
                 stack.push(-value);
             }
-            OpCode::OpFact => {
+            Instr::OpFact => {
                 let value = stack.pop().unwrap();
                 if (value.abs() - value) > 1e-8 || value < 0.0 {
                     panic!("Invalid factorial: {}", value);
@@ -33,32 +33,32 @@ pub(super) fn execute(opcodes: &[OpCode], env: &mut HashMap<String, f64>) -> Opt
                 let res = (1..=value).product::<i64>();
                 stack.push(res as f64);
             }
-            OpCode::OpAdd => {
+            Instr::OpAdd => {
                 let rhs = stack.pop().unwrap();
                 let lhs = stack.pop().unwrap();
                 stack.push(lhs + rhs);
             }
-            OpCode::OpSub => {
+            Instr::OpSub => {
                 let rhs = stack.pop().unwrap();
                 let lhs = stack.pop().unwrap();
                 stack.push(lhs - rhs);
             }
-            OpCode::OpMul => {
+            Instr::OpMul => {
                 let rhs = stack.pop().unwrap();
                 let lhs = stack.pop().unwrap();
                 stack.push(lhs * rhs);
             }
-            OpCode::OpDiv => {
+            Instr::OpDiv => {
                 let rhs = stack.pop().unwrap();
                 let lhs = stack.pop().unwrap();
                 stack.push(lhs / rhs);
             }
-            OpCode::OpPow => {
+            Instr::OpPow => {
                 let rhs = stack.pop().unwrap();
                 let lhs = stack.pop().unwrap();
                 stack.push(lhs.powf(rhs));
             }
-            OpCode::Call(ident) => {
+            Instr::Call(ident) => {
                 let value = stack.pop().unwrap();
                 match ident.as_str() {
                     "sqrt" => stack.push(value.sqrt()),
